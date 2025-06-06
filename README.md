@@ -51,6 +51,7 @@
 <ul>
   <li>✅ Diagrama Entidad-Relación</li>
   <li>✅ Script de creación</li>
+  <li>⬜ Script de inserción de datos de prueba</li>
   <li>⬜ Vistas
     <ul>
       <li>⬜ Vista 1</li>
