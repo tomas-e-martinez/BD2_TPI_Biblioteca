@@ -54,7 +54,7 @@
   <li>✅ Script de inserción de datos de prueba</li>
   <li>⬜ Vistas
     <ul>
-      <li>⬜ Vista 1</li>
+      <li>✅ Vista préstamos activos</li>
       <li>⬜ Vista 2</li>
       <li>⬜ Vista 3</li>
     </ul>
