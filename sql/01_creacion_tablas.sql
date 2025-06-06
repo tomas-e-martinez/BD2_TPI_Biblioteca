@@ -62,8 +62,8 @@ BEGIN
 	CREATE TABLE Ejemplares(
 		IDEjemplar INT PRIMARY KEY IDENTITY (1,1),
 		IDLibro INT NOT NULL,
-		Estado NVARCHAR(50),
-		Observaciones NVARCHAR(255),
+		Estado NVARCHAR(50) NOT NULL,
+		Observaciones NVARCHAR(255) NULL,
 		FOREIGN KEY (IDLibro) REFERENCES Libros(IDLibro) ON DELETE CASCADE
 	)
 
