@@ -51,7 +51,7 @@
 <ul>
   <li>✅ Diagrama Entidad-Relación</li>
   <li>✅ Script de creación</li>
-  <li>⬜ Script de inserción de datos de prueba</li>
+  <li>✅ Script de inserción de datos de prueba</li>
   <li>⬜ Vistas
     <ul>
       <li>⬜ Vista 1</li>
@@ -62,7 +62,7 @@
   <li>⬜ Procedimientos almacenados
     <ul>
       <li>⬜ Procedimiento almacenado para reporte parametrizado</li>
-      <li>⬜ Procedimiento almacenado para resolver acción en BD</li>
+      <li>✅ Procedimiento almacenado para resolver acción en BD</li>
     </ul>
   </li>
   <li>⬜ Triggers
