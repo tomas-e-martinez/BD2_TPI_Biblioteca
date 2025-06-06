@@ -67,7 +67,7 @@
   </li>
   <li>⬜ Triggers
     <ul>
-      <li>⬜ Trigger tras inserción</li>
+      <li>✅ Trigger tras inserción de préstamo</li>
       <li>⬜ Trigger tras eliminación</li>
     </ul>
   </li>
