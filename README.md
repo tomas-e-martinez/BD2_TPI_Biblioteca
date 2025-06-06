@@ -47,5 +47,32 @@
   </li>
 </ul>
 
+<h2>Estado de avances</h2>
+<ul>
+  <li>✅ Diagrama Entidad-Relación</li>
+  <li>✅ Script de creación</li>
+  <li>⬜ Vistas
+    <ul>
+      <li>⬜ Vista 1</li>
+      <li>⬜ Vista 2</li>
+      <li>⬜ Vista 3</li>
+    </ul>
+  </li>
+  <li>⬜ Procedimientos almacenados
+    <ul>
+      <li>⬜ Procedimiento almacenado para reporte parametrizado</li>
+      <li>⬜ Procedimiento almacenado para resolver acción en BD</li>
+    </ul>
+  </li>
+  <li>⬜ Triggers
+    <ul>
+      <li>⬜ Trigger tras inserción</li>
+      <li>⬜ Trigger tras eliminación</li>
+    </ul>
+  </li>
+  <li>⬜ Documento PDF</li>
+  <li>⬜ Video demo</li>
+</ul>
+
 <h2>DER (Diagrama Entidad-Relación)</h2>
 <img src="img/der.png" alt="Diagrama entidad-relación" />
