@@ -15,3 +15,35 @@ INNER JOIN Usuarios U ON P.IDUsuario = U.IDUsuario
 INNER JOIN Ejemplares E ON P.IDEjemplar = E.IDEjemplar
 INNER JOIN Libros L ON E.IDLibro = L.IDLibro
 WHERE P.Devuelto = 0
+
+
+	
+CREATE VIEW VW_CantidadLibrosPorCategoria AS
+SELECT 
+    C.Descripcion AS Categoria,
+    COUNT(LC.IDLibro) AS CantidadLibros
+FROM 
+    Categorias C
+LEFT JOIN 
+    LibroCategoria LC ON C.IDCategoria = LC.IDCategoria
+GROUP BY 
+    C.Descripcion
+
+	
+
+ALTER VIEW VW_LibrosDisponibles AS
+SELECT 
+    L.Titulo,
+    L.AnioPublicacion,
+    E.IDEjemplar,
+    E.Estado,
+    E.Observaciones
+FROM Libros L
+INNER JOIN Ejemplares E ON L.IDLibro = E.IDLibro
+WHERE E.Estado = 'Disponible' 
+AND E.IDEjemplar NOT IN (
+    SELECT P.IDEjemplar 
+    FROM Prestamos P 
+    WHERE P.Devuelto = 0
+)
+
