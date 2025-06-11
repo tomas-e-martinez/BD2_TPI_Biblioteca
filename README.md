@@ -52,11 +52,11 @@
   <li>✅ Diagrama Entidad-Relación</li>
   <li>✅ Script de creación</li>
   <li>✅ Script de inserción de datos de prueba</li>
-  <li>⬜ Vistas
+  <li>✅ Vistas
     <ul>
       <li>✅ Vista préstamos activos</li>
-      <li>⬜ Vista 2</li>
-      <li>⬜ Vista 3</li>
+      <li>✅ Vista 2</li>
+      <li>✅ Vista 3</li>
     </ul>
   </li>
   <li>⬜ Procedimientos almacenados
@@ -65,10 +65,10 @@
       <li>✅ Procedimiento almacenado para resolver acción en BD</li>
     </ul>
   </li>
-  <li>⬜ Triggers
+  <li>✅ Triggers
     <ul>
       <li>✅ Trigger tras inserción de préstamo</li>
-      <li>⬜ Trigger tras eliminación</li>
+      <li>✅ Trigger tras eliminación</li>
     </ul>
   </li>
   <li>⬜ Documento PDF</li>
