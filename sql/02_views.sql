@@ -21,11 +21,16 @@ WHERE P.Devuelto = 0
 CREATE VIEW VW_CantidadLibrosPorCategoria AS
 SELECT 
     C.Descripcion AS Categoria,
-    COUNT(LC.IDLibro) AS CantidadLibros
+    COUNT(DISTINCT LC.IDLibro) AS CantidadLibros,
+	COUNT(E.IDEjemplar) AS CantidadEjemplares
 FROM 
     Categorias C
 LEFT JOIN 
     LibroCategoria LC ON C.IDCategoria = LC.IDCategoria
+LEFT JOIN
+	Libros L ON LC.IDLibro = L.IDLibro
+LEFT JOIN
+	Ejemplares E ON L.IDLibro = E.IDLibro
 GROUP BY 
     C.Descripcion
 
