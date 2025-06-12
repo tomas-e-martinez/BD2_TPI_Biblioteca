@@ -64,3 +64,28 @@ BEGIN
 		END
 	END CATCH
 END
+
+CREATE PROCEDURE SP_ListarPrestamosPorUsuario
+	@IDUsuario INT,
+	@Devuelto BIT = NULL
+AS
+BEGIN
+	BEGIN TRY
+		SELECT 
+			P.IDPrestamo, 
+			P.FechaPrestamo, 
+			P.FechaDevolucion, 
+			L.Titulo AS Libro, 
+			E.IDEjemplar, 
+			E.Estado
+		FROM Prestamos P
+		INNER JOIN Ejemplares E ON P.IDEjemplar = E.IDEjemplar
+		INNER JOIN Libros L ON E.IDLibro = L.IDLibro
+		WHERE P.IDUsuario = @IDUsuario
+		AND (@Devuelto IS NULL OR P.Devuelto = @Devuelto)
+	END TRY
+	BEGIN CATCH
+		PRINT ERROR_MESSAGE()
+		RAISERROR('ERROR AL GENERAR REPORTE', 16, 1)
+	END CATCH
+END
