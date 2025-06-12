@@ -59,9 +59,9 @@
       <li>✅ Vista libros disponibles</li>
     </ul>
   </li>
-  <li>⬜ Procedimientos almacenados
+  <li>✅ Procedimientos almacenados
     <ul>
-      <li>⬜ Procedimiento almacenado para reporte parametrizado</li>
+      <li>✅ Procedimiento almacenado para reporte parametrizado</li>
       <li>✅ Procedimiento almacenado para resolver acción en BD</li>
     </ul>
   </li>
