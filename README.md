@@ -55,8 +55,8 @@
   <li>✅ Vistas
     <ul>
       <li>✅ Vista préstamos activos</li>
-      <li>✅ Vista 2</li>
-      <li>✅ Vista 3</li>
+      <li>✅ Vista cantidad libros y ejemplares por categoría</li>
+      <li>✅ Vista libros disponibles</li>
     </ul>
   </li>
   <li>⬜ Procedimientos almacenados
@@ -68,7 +68,7 @@
   <li>✅ Triggers
     <ul>
       <li>✅ Trigger tras inserción de préstamo</li>
-      <li>✅ Trigger tras eliminación</li>
+      <li>✅ Trigger tras eliminación de préstamo</li>
     </ul>
   </li>
   <li>⬜ Documento PDF</li>
