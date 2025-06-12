@@ -36,7 +36,7 @@ GROUP BY
 
 	
 
-ALTER VIEW VW_LibrosDisponibles AS
+CREATE VIEW VW_LibrosDisponibles AS
 SELECT 
     L.Titulo,
     L.AnioPublicacion,
