@@ -1,5 +1,8 @@
 <h1>Trabajo Práctico Integrador - BD2</h1>
 
+<h2>Documentación</h2>
+<a href="https://docs.google.com/document/d/1fh6SV2COUPRgl3D2gCX0bWm7wT2RD71qkiE3plALres/edit?usp=sharing">Google Docs</a>
+
 <h2>Repositorio público</h2>
 <p>Este repositorio contiene el desarrollo del Trabajo Práctico Integrador para la materia Base de Datos 2.</p>
 
