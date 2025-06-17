@@ -20,6 +20,5 @@ BEGIN
 	SET E.Estado = 'Disponible'
 	FROM Ejemplares E
 	INNER JOIN deleted D ON E.IDEjemplar = D.IDEjemplar
-	INNER JOIN Prestamos P ON P.IDPrestamo = D.IDPrestamo
-	WHERE P.Devuelto = 0 --SOLO ACTUALIZA SI EL PRÉSTAMO NO FUE DEVUELTO (ES DECIR, SE ABORTÓ)
+	WHERE D.Devuelto = 0 --SOLO ACTUALIZA SI EL PRÉSTAMO NO FUE DEVUELTO (ES DECIR, SE ABORTÓ)
 END
