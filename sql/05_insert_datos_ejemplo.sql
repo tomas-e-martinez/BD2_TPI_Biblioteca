@@ -67,31 +67,34 @@ BEGIN TRY
 		--EJEMPLARES
 		INSERT INTO Ejemplares (IDLibro, Estado, Observaciones)
 		VALUES
-			(1, 'Disponible', NULL),
-			(1, 'Prestado', 'Leve desgaste en portada'),
-			(2, 'Disponible', NULL),
-			(2, 'Disponible', NULL),
-			(3, 'Prestado', 'Manchas en las primeras páginas'),
-			(4, 'Disponible', NULL),
-			(4, 'Disponible', NULL),
-			(4, 'Prestado', NULL),
-			(5, 'Disponible', NULL),
-			(6, 'Prestado', NULL),
-			(7, 'Disponible', NULL),
-			(7, 'Disponible', 'Edición especial'),
-			(8, 'Disponible', NULL);
+			(1, 'Prestado', NULL),                            -- IDEjemplar = 1
+			(1, 'Disponible', 'Leve desgaste en portada'),    -- IDEjemplar = 2
+			(2, 'Prestado', NULL),                            -- IDEjemplar = 3
+			(2, 'Disponible', NULL),                          -- IDEjemplar = 4
+			(3, 'Prestado', 'Manchas en las primeras páginas'),-- IDEjemplar = 5
+			(4, 'Disponible', NULL),                          -- IDEjemplar = 6
+			(4, 'Prestado', NULL),                            -- IDEjemplar = 7
+			(4, 'Disponible', NULL),                          -- IDEjemplar = 8
+			(5, 'Disponible', NULL),                          -- IDEjemplar = 9
+			(6, 'Disponible', NULL),                          -- IDEjemplar = 10
+			(7, 'Disponible', NULL),                          -- IDEjemplar = 11
+			(7, 'Disponible', 'Edición especial'),            -- IDEjemplar = 12
+			(8, 'Prestado', NULL);							  -- IDEjemplar = 13
 
 		--PRESTAMOS
 		INSERT INTO Prestamos (IDUsuario, IDEjemplar, FechaPrestamo, FechaDevolucion, Devuelto)
 		VALUES 
 			(1, 1, '2025-06-01', '2025-06-15', 0),
 			(2, 2, '2025-06-02', '2025-06-16', 1),
+			(2, 13, '2025-06-19', '2025-07-03', 0),
 			(3, 3, '2025-06-05', '2025-06-19', 0),
 			(4, 4, '2025-06-06', '2025-06-20', 1),
 			(5, 5, '2025-06-07', '2025-06-21', 0),
 			(6, 6, '2025-06-08', '2025-06-22', 1),
 			(7, 7, '2025-06-09', '2025-06-23', 0),
 			(8, 8, '2025-06-10', '2025-06-24', 1);
+
+		UPDATE Ejemplares SET Estado = 'Disponible' WHERE IDEjemplar IN (SELECT IDEjemplar FROM Prestamos WHERE Devuelto = 1);
 	COMMIT TRANSACTION
 END TRY
 BEGIN CATCH
