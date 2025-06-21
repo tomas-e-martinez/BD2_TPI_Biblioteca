@@ -1,6 +1,8 @@
 <h1>Trabajo Práctico Integrador - BD2</h1>
 
 <h2>Documentación</h2>
+<p>Para crear e inicializar la base de datos, ejecutar el script SQL llamado 'script_completo.sql'. </p>
+
 <a href="https://docs.google.com/document/d/1fh6SV2COUPRgl3D2gCX0bWm7wT2RD71qkiE3plALres/edit?usp=sharing">Google Docs</a>
 
 <h2>Repositorio público</h2>
