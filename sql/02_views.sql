@@ -47,7 +47,7 @@ LEFT JOIN
 GROUP BY 
     C.Descripcion
 
-CREATE VIEW VW_LibrosDisponibles AS
+ALTER VIEW VW_LibrosDisponibles AS
 SELECT 
 	L.IDLibro,
 	E.IDEjemplar,
@@ -57,9 +57,4 @@ SELECT
     E.Observaciones
 FROM Libros L
 INNER JOIN Ejemplares E ON L.IDLibro = E.IDLibro
-WHERE E.Estado = 'Disponible' 
-AND E.IDEjemplar NOT IN (
-    SELECT P.IDEjemplar 
-    FROM Prestamos P 
-    WHERE P.Devuelto = 0
-)
+WHERE E.Estado = 'Disponible'
