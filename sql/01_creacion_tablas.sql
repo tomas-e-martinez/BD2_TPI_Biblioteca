@@ -71,9 +71,9 @@ BEGIN
 		IDPrestamo INT PRIMARY KEY IDENTITY (1,1),
 		IDUsuario INT NOT NULL,
 		IDEjemplar INT NOT NULL,
-		FechaPrestamo DATE NOT NULL,
+		FechaPrestamo DATE NOT NULL DEFAULT GETDATE(),
 		FechaDevolucion DATE NOT NULL,
-		Devuelto BIT NOT NULL,
+		Devuelto BIT NOT NULL DEFAULT 0,
 		FOREIGN KEY (IDUsuario) REFERENCES Usuarios(IDUsuario) ON DELETE CASCADE,
 		FOREIGN KEY (IDEjemplar) REFERENCES Ejemplares(IDEjemplar) ON DELETE CASCADE
 	)
