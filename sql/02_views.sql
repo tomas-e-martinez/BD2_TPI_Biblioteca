@@ -29,8 +29,6 @@ SELECT
 FROM VW_HistorialPrestamos
 WHERE Devuelto = 0
 
-
-	
 CREATE VIEW VW_CantidadLibrosPorCategoria AS
 SELECT 
     C.Descripcion AS Categoria,
@@ -47,7 +45,7 @@ LEFT JOIN
 GROUP BY 
     C.Descripcion
 
-ALTER VIEW VW_LibrosDisponibles AS
+CREATE VIEW VW_LibrosDisponibles AS
 SELECT 
 	L.IDLibro,
 	E.IDEjemplar,
