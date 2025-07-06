@@ -75,9 +75,9 @@ BEGIN
 		IDPrestamo INT PRIMARY KEY IDENTITY (1,1),
 		IDUsuario INT NOT NULL,
 		IDEjemplar INT NOT NULL,
-		FechaPrestamo DATE NOT NULL,
+		FechaPrestamo DATE NOT NULL DEFAULT GETDATE(),
 		FechaDevolucion DATE NOT NULL,
-		Devuelto BIT NOT NULL,
+		Devuelto BIT NOT NULL DEFAULT 0,
 		FOREIGN KEY (IDUsuario) REFERENCES Usuarios(IDUsuario) ON DELETE CASCADE,
 		FOREIGN KEY (IDEjemplar) REFERENCES Ejemplares(IDEjemplar) ON DELETE CASCADE
 	)
@@ -85,36 +85,48 @@ END
 GO
 
 
+
 -- ========================================
 -- 2. CREACIÓN DE VISTAS
 -- ========================================
 
-CREATE VIEW VW_PrestamosActivos AS
+CREATE VIEW VW_HistorialPrestamos AS
 SELECT 
-	P.IDPrestamo, 
+	P.IDPrestamo,
+	U.IDUsuario,
 	(U.Nombre + ' ' + U.Apellido) AS Usuario, 
-	L.Titulo, 
+	P.IDEjemplar, 
+	L.Titulo AS Libro, 
 	P.FechaPrestamo, 
-	P.FechaDevolucion,
-	CASE
-		WHEN P.FechaDevolucion < GETDATE()
-		THEN 1
-		ELSE 0
-	END AS Atrasado,
-	CASE
-		WHEN P.FechaDevolucion < GETDATE()
-		THEN DATEDIFF(DAY, P.FechaDevolucion, GETDATE())
-		ELSE NULL
-	END AS DiasAtraso
+	P.FechaDevolucion, 
+	P.Devuelto
 FROM Prestamos P
 INNER JOIN Usuarios U ON P.IDUsuario = U.IDUsuario
 INNER JOIN Ejemplares E ON P.IDEjemplar = E.IDEjemplar
 INNER JOIN Libros L ON E.IDLibro = L.IDLibro
-WHERE P.Devuelto = 0
 GO
 
 
 	
+CREATE VIEW VW_PrestamosActivos AS
+SELECT 
+	*,
+	CASE
+		WHEN FechaDevolucion < GETDATE()
+		THEN 1
+		ELSE 0
+	END AS Atrasado,
+	CASE
+		WHEN FechaDevolucion < GETDATE()
+		THEN DATEDIFF(DAY, FechaDevolucion, GETDATE())
+		ELSE NULL
+	END AS DiasAtraso
+FROM VW_HistorialPrestamos
+WHERE Devuelto = 0
+GO
+
+	
+
 CREATE VIEW VW_CantidadLibrosPorCategoria AS
 SELECT 
     C.Descripcion AS Categoria,
@@ -132,23 +144,19 @@ GROUP BY
     C.Descripcion
 GO
 
-	
+
 
 CREATE VIEW VW_LibrosDisponibles AS
 SELECT 
+	L.IDLibro,
+	E.IDEjemplar,
     L.Titulo,
-    L.AnioPublicacion,
-    E.IDEjemplar,
+    L.AnioPublicacion AS AñoPublicacion,
     E.Estado,
     E.Observaciones
 FROM Libros L
 INNER JOIN Ejemplares E ON L.IDLibro = E.IDLibro
-WHERE E.Estado = 'Disponible' 
-AND E.IDEjemplar NOT IN (
-    SELECT P.IDEjemplar 
-    FROM Prestamos P 
-    WHERE P.Devuelto = 0
-)
+WHERE E.Estado = 'Disponible'
 GO
 
 
@@ -225,32 +233,6 @@ BEGIN
 END
 GO
 
-CREATE PROCEDURE SP_ListarPrestamosPorUsuario
-	@IDUsuario INT,
-	@Devuelto BIT = NULL
-AS
-BEGIN
-	BEGIN TRY
-		SELECT 
-			P.IDPrestamo, 
-			P.FechaPrestamo, 
-			P.FechaDevolucion, 
-			L.Titulo AS Libro, 
-			E.IDEjemplar, 
-			E.Estado
-		FROM Prestamos P
-		INNER JOIN Ejemplares E ON P.IDEjemplar = E.IDEjemplar
-		INNER JOIN Libros L ON E.IDLibro = L.IDLibro
-		WHERE P.IDUsuario = @IDUsuario
-		AND (@Devuelto IS NULL OR P.Devuelto = @Devuelto)
-	END TRY
-	BEGIN CATCH
-		PRINT ERROR_MESSAGE()
-		RAISERROR('ERROR AL GENERAR REPORTE', 16, 1)
-	END CATCH
-END
-GO
-
 
 -- ========================================
 -- 4. CREACIÓN DE TRIGGERS
@@ -281,10 +263,24 @@ BEGIN
 END
 GO
 
+CREATE TRIGGER TR_ActualizarEjemplarPrestamoDevuelto
+ON Prestamos
+AFTER UPDATE
+AS
+BEGIN
+	UPDATE E
+	SET E.Estado = 'Disponible'
+	FROM Ejemplares E
+	INNER JOIN inserted I ON E.IDEjemplar = I.IDEjemplar
+	INNER JOIN deleted D ON E.IDEjemplar = D.IDEjemplar
+	WHERE I.Devuelto = 1 AND D.Devuelto = 0
+END
+GO
+
 
 
 -- ========================================
--- 4. INSERCIÓN DE DATOS DE PRUEBA
+-- 5. INSERCIÓN DE DATOS DE PRUEBA
 -- ========================================
 
 BEGIN TRY
