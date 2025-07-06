@@ -1,25 +1,33 @@
-CREATE VIEW VW_PrestamosActivos AS
+CREATE VIEW VW_HistorialPrestamos AS
 SELECT 
-	P.IDPrestamo, 
+	P.IDPrestamo,
+	U.IDUsuario,
 	(U.Nombre + ' ' + U.Apellido) AS Usuario, 
-	L.Titulo, 
+	P.IDEjemplar, 
+	L.Titulo AS Libro, 
 	P.FechaPrestamo, 
-	P.FechaDevolucion,
-	CASE
-		WHEN P.FechaDevolucion < GETDATE()
-		THEN 1
-		ELSE 0
-	END AS Atrasado,
-	CASE
-		WHEN P.FechaDevolucion < GETDATE()
-		THEN DATEDIFF(DAY, P.FechaDevolucion, GETDATE())
-		ELSE NULL
-	END AS DiasAtraso
+	P.FechaDevolucion, 
+	P.Devuelto
 FROM Prestamos P
 INNER JOIN Usuarios U ON P.IDUsuario = U.IDUsuario
 INNER JOIN Ejemplares E ON P.IDEjemplar = E.IDEjemplar
 INNER JOIN Libros L ON E.IDLibro = L.IDLibro
-WHERE P.Devuelto = 0
+
+CREATE VIEW VW_PrestamosActivos AS
+SELECT 
+	*,
+	CASE
+		WHEN FechaDevolucion < GETDATE()
+		THEN 1
+		ELSE 0
+	END AS Atrasado,
+	CASE
+		WHEN FechaDevolucion < GETDATE()
+		THEN DATEDIFF(DAY, FechaDevolucion, GETDATE())
+		ELSE NULL
+	END AS DiasAtraso
+FROM VW_HistorialPrestamos
+WHERE Devuelto = 0
 
 
 	
@@ -39,13 +47,12 @@ LEFT JOIN
 GROUP BY 
     C.Descripcion
 
-	
-
 CREATE VIEW VW_LibrosDisponibles AS
 SELECT 
+	L.IDLibro,
+	E.IDEjemplar,
     L.Titulo,
-    L.AnioPublicacion,
-    E.IDEjemplar,
+    L.AnioPublicacion AS AñoPublicacion,
     E.Estado,
     E.Observaciones
 FROM Libros L
@@ -56,4 +63,3 @@ AND E.IDEjemplar NOT IN (
     FROM Prestamos P 
     WHERE P.Devuelto = 0
 )
-
