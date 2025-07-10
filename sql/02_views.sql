@@ -1,15 +1,18 @@
 CREATE VIEW VW_HistorialPrestamos AS
 SELECT 
 	P.IDPrestamo,
-	U.IDUsuario,
-	(U.Nombre + ' ' + U.Apellido) AS Usuario, 
+	UA.IDUsuario AS IDAdmin,
+	(UA.Nombre + ' ' + UA.Apellido) AS Administrador, 
+	UC.IDUsuario AS IDCliente,
+	(UC.Nombre + ' ' + UC.Apellido) AS Cliente, 
 	P.IDEjemplar, 
 	L.Titulo AS Libro, 
 	P.FechaPrestamo, 
 	P.FechaDevolucion, 
 	P.Devuelto
 FROM Prestamos P
-INNER JOIN Usuarios U ON P.IDUsuario = U.IDUsuario
+INNER JOIN Usuarios UA ON P.IDAdmin = UA.IDUsuario
+INNER JOIN Usuarios UC ON P.IDCliente = UC.IDUsuario
 INNER JOIN Ejemplares E ON P.IDEjemplar = E.IDEjemplar
 INNER JOIN Libros L ON E.IDLibro = L.IDLibro
 

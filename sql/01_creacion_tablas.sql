@@ -36,11 +36,16 @@ BEGIN
 
 	CREATE TABLE Usuarios(
 		IDUsuario INT PRIMARY KEY IDENTITY (1,1),
+		Rol NVARCHAR(20) NOT NULL, 
 		DNI NVARCHAR(20) NOT NULL UNIQUE,
-		Email NVARCHAR(255) NOT NULL,
+		Email NVARCHAR(255) NOT NULL UNIQUE,
+		Contrasena NVARCHAR(255) NOT NULL,
 		Nombre NVARCHAR(100) NOT NULL,
 		Apellido NVARCHAR(100) NOT NULL,
-		Telefono NVARCHAR(20) NULL
+		Telefono NVARCHAR(20) NULL,
+		CONSTRAINT CHK_Rol_Valido CHECK(
+			Rol IN ('admin', 'cliente')
+		)
 	)
 
 	CREATE TABLE LibroAutor(
@@ -69,13 +74,16 @@ BEGIN
 
 	CREATE TABLE Prestamos(
 		IDPrestamo INT PRIMARY KEY IDENTITY (1,1),
-		IDUsuario INT NOT NULL,
+		IDCliente INT NOT NULL,
+		IDAdmin INT NOT NULL,
 		IDEjemplar INT NOT NULL,
 		FechaPrestamo DATE NOT NULL DEFAULT GETDATE(),
 		FechaDevolucion DATE NOT NULL,
 		Devuelto BIT NOT NULL DEFAULT 0,
-		FOREIGN KEY (IDUsuario) REFERENCES Usuarios(IDUsuario) ON DELETE CASCADE,
-		FOREIGN KEY (IDEjemplar) REFERENCES Ejemplares(IDEjemplar) ON DELETE CASCADE
+		FOREIGN KEY (IDCliente) REFERENCES Usuarios(IDUsuario),
+		FOREIGN KEY (IDAdmin) REFERENCES Usuarios(IDUsuario),
+		FOREIGN KEY (IDEjemplar) REFERENCES Ejemplares(IDEjemplar) ON DELETE CASCADE,
+		CONSTRAINT CHK_FechaDevolucion CHECK (FechaDevolucion >= FechaPrestamo)
 	)
 END
 GO

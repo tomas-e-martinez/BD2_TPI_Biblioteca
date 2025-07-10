@@ -1,5 +1,5 @@
 -- ========================================
--- 1. CREACI”N DE DB Y TABLAS
+-- 1. CREACI√ìN DE DB Y TABLAS
 -- ========================================
 
 --CREAR BASE DE DATOS SI NO EXISTE
@@ -40,11 +40,16 @@ BEGIN
 
 	CREATE TABLE Usuarios(
 		IDUsuario INT PRIMARY KEY IDENTITY (1,1),
+		Rol NVARCHAR(20) NOT NULL, 
 		DNI NVARCHAR(20) NOT NULL UNIQUE,
-		Email NVARCHAR(255) NOT NULL,
+		Email NVARCHAR(255) NOT NULL UNIQUE,
+		Contrasena NVARCHAR(255) NOT NULL,
 		Nombre NVARCHAR(100) NOT NULL,
 		Apellido NVARCHAR(100) NOT NULL,
-		Telefono NVARCHAR(20) NULL
+		Telefono NVARCHAR(20) NULL,
+		CONSTRAINT CHK_Rol_Valido CHECK(
+			Rol IN ('admin', 'cliente')
+		)
 	)
 
 	CREATE TABLE LibroAutor(
@@ -73,35 +78,42 @@ BEGIN
 
 	CREATE TABLE Prestamos(
 		IDPrestamo INT PRIMARY KEY IDENTITY (1,1),
-		IDUsuario INT NOT NULL,
+		IDCliente INT NOT NULL,
+		IDAdmin INT NOT NULL,
 		IDEjemplar INT NOT NULL,
 		FechaPrestamo DATE NOT NULL DEFAULT GETDATE(),
 		FechaDevolucion DATE NOT NULL,
 		Devuelto BIT NOT NULL DEFAULT 0,
-		FOREIGN KEY (IDUsuario) REFERENCES Usuarios(IDUsuario) ON DELETE CASCADE,
-		FOREIGN KEY (IDEjemplar) REFERENCES Ejemplares(IDEjemplar) ON DELETE CASCADE
+		FOREIGN KEY (IDCliente) REFERENCES Usuarios(IDUsuario),
+		FOREIGN KEY (IDAdmin) REFERENCES Usuarios(IDUsuario),
+		FOREIGN KEY (IDEjemplar) REFERENCES Ejemplares(IDEjemplar) ON DELETE CASCADE,
+		CONSTRAINT CHK_FechaDevolucion CHECK (FechaDevolucion >= FechaPrestamo)
 	)
 END
 GO
 
 
 
+
 -- ========================================
--- 2. CREACI”N DE VISTAS
+-- 2. CREACI√ìN DE VISTAS
 -- ========================================
 
 CREATE VIEW VW_HistorialPrestamos AS
 SELECT 
 	P.IDPrestamo,
-	U.IDUsuario,
-	(U.Nombre + ' ' + U.Apellido) AS Usuario, 
+	UA.IDUsuario AS IDAdmin,
+	(UA.Nombre + ' ' + UA.Apellido) AS Administrador, 
+	UC.IDUsuario AS IDCliente,
+	(UC.Nombre + ' ' + UC.Apellido) AS Cliente, 
 	P.IDEjemplar, 
 	L.Titulo AS Libro, 
 	P.FechaPrestamo, 
 	P.FechaDevolucion, 
 	P.Devuelto
 FROM Prestamos P
-INNER JOIN Usuarios U ON P.IDUsuario = U.IDUsuario
+INNER JOIN Usuarios UA ON P.IDAdmin = UA.IDUsuario
+INNER JOIN Usuarios UC ON P.IDCliente = UC.IDUsuario
 INNER JOIN Ejemplares E ON P.IDEjemplar = E.IDEjemplar
 INNER JOIN Libros L ON E.IDLibro = L.IDLibro
 GO
@@ -151,7 +163,7 @@ SELECT
 	L.IDLibro,
 	E.IDEjemplar,
     L.Titulo,
-    L.AnioPublicacion AS AÒoPublicacion,
+    L.AnioPublicacion AS A√±oPublicacion,
     E.Estado,
     E.Observaciones
 FROM Libros L
@@ -162,7 +174,7 @@ GO
 
 
 -- ========================================
--- 3. CREACI”N DE PROCEDIMIENTOS ALMACENADOS
+-- 3. CREACI√ìN DE PROCEDIMIENTOS ALMACENADOS
 -- ========================================
 
 CREATE PROCEDURE SP_InsertLibro
@@ -235,7 +247,7 @@ GO
 
 
 -- ========================================
--- 4. CREACI”N DE TRIGGERS
+-- 4. CREACI√ìN DE TRIGGERS
 -- ========================================
 
 CREATE TRIGGER TR_ActualizarEstadoEjemplar
@@ -259,7 +271,7 @@ BEGIN
 	SET E.Estado = 'Disponible'
 	FROM Ejemplares E
 	INNER JOIN deleted D ON E.IDEjemplar = D.IDEjemplar
-	WHERE D.Devuelto = 0 --SOLO ACTUALIZA SI EL PR…STAMO NO FUE DEVUELTO (ES DECIR, SE ABORT”)
+	WHERE D.Devuelto = 0 --SOLO ACTUALIZA SI EL PR√âSTAMO NO FUE DEVUELTO (ES DECIR, SE ABORT√ì)
 END
 GO
 
@@ -277,10 +289,38 @@ BEGIN
 END
 GO
 
+CREATE TRIGGER TR_ValidarAdminInsert
+ON Prestamos
+INSTEAD OF INSERT
+AS
+BEGIN
+	--VALIDAR QUE TODOS LOS IDADMIN INGRESADOS PERTENEZCAN A UN USUARIO CON ROL 'ADMIN'
+	IF NOT EXISTS (
+        SELECT 1
+        FROM inserted i
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM Usuarios u
+            WHERE u.IDUsuario = i.IDAdmin AND u.Rol = 'admin'
+        )
+    )
+
+	BEGIN
+		INSERT INTO Prestamos (IDCliente, IDAdmin, IDEjemplar, FechaPrestamo, FechaDevolucion, Devuelto)
+		SELECT IDCliente, IDAdmin, IDEjemplar, FechaPrestamo, FechaDevolucion, Devuelto
+		FROM inserted
+	END
+	ELSE
+	BEGIN
+		RAISERROR('EL IDADMIN DEBE PERTENECER A UN USUARIO CON EL ROL "ADMIN"', 16, 1)
+	END
+END
+GO
+
 
 
 -- ========================================
--- 5. INSERCI”N DE DATOS DE PRUEBA
+-- 5. INSERCI√ìN DE DATOS DE PRUEBA
 -- ========================================
 
 BEGIN TRY
@@ -288,63 +328,63 @@ BEGIN TRY
 		--AUTORES
 		INSERT INTO Autores (Nombre, Apellido, Seudonimo)
 		VALUES
-			('Gabriel', 'GarcÌa M·rquez', NULL),
+			('Gabriel', 'Garc√≠a M√°rquez', NULL),
 			('J.K.', 'Rowling', NULL),
 			('George', 'Orwell', NULL),
 			('Isaac', 'Asimov', NULL),
-			('FiÛdor', 'Dostoyevski', NULL),
+			('Fi√≥dor', 'Dostoyevski', NULL),
 			('Jane', 'Austen', NULL),
 			('Haruki', 'Murakami', NULL),
 			(NULL, NULL, 'Mark Twain'),
 			(NULL, NULL, 'Lewis Carroll'),
 			(NULL, NULL, 'L. Frank Baum');
 
-		--CATEGORÕAS
+		--CATEGOR√çAS
 		INSERT INTO Categorias (Descripcion)
 		VALUES
-			('FicciÛn'),
-			('No FicciÛn'),
-			('Ciencia FicciÛn'),
+			('Ficci√≥n'),
+			('No Ficci√≥n'),
+			('Ciencia Ficci√≥n'),
 			('Suspenso'),
-			('Rom·ntico'),
+			('Rom√°ntico'),
 			('Historia'),
-			('Fant·stico'),
+			('Fant√°stico'),
 			('Aventura'),
 			('Terror'),
-			('BiografÌa');
+			('Biograf√≠a');
 
 		--USUARIOS
-		INSERT INTO Usuarios (DNI, Email, Nombre, Apellido, Telefono)
+		INSERT INTO Usuarios (Rol, DNI, Email, Contrasena, Nombre, Apellido, Telefono)
 		VALUES
-			('12345678', 'juan.perez@email.com', 'Juan', 'PÈrez', '555-1234'),
-			('87654321', 'maria.gomez@email.com', 'MarÌa', 'GÛmez', '555-2345'),
-			('11223344', 'luis.rodriguez@email.com', 'Luis', 'RodrÌguez', '555-3456'),
-			('22334455', 'ana.martinez@email.com', 'Ana', 'MartÌnez', '555-4567'),
-			('33445566', 'carlos.sanchez@email.com', 'Carlos', 'S·nchez', '555-5678'),
-			('44556677', 'elena.ferrer@email.com', 'Elena', 'Ferrer', '555-6789'),
-			('55667788', 'pedro.alvarez@email.com', 'Pedro', '¡lvarez', '555-7890'),
-			('66778899', 'sofia.lopez@email.com', 'SofÌa', 'LÛpez', '555-8901'),
-			('77889900', 'jorge.garcia@email.com', 'Jorge', 'GarcÌa', '555-9012'),
-			('88990011', 'lucia.morales@email.com', 'LucÌa', 'Morales', '555-0123'),
-			('99001122', 'daniel.perez@email.com', 'Daniel', 'PÈrez', '555-1234'),
-			('10011223', 'veronica.rojas@email.com', 'VerÛnica', 'Rojas', '555-2345'),
-			('11122334', 'martin.molina@email.com', 'MartÌn', 'Molina', '555-3456'),
-			('12233445', 'silvia.gonzalez@email.com', 'Silvia', 'Gonz·lez', '555-4567'),
-			('13344556', 'alfonso.torres@email.com', 'Alfonso', 'Torres', '555-5678'),
-			('14455667', 'raquel.diaz@email.com', 'Raquel', 'DÌaz', '555-6789'),
-			('15566778', 'ricardo.castro@email.com', 'Ricardo', 'Castro', '555-7890'),
-			('16677889', 'marta.suarez@email.com', 'Marta', 'Su·rez', '555-8901'),
-			('17788990', 'francisco.martinez@email.com', 'Francisco', 'MartÌnez', '555-9012'),
-			('18899001', 'patricia.lopez@email.com', 'Patricia', 'LÛpez', '555-0123');
+			('admin',   '12345678', 'juan.perez@email.com',     'pass123', 'Juan',     'P√©rez',    '555-1234'),
+			('admin',   '87654321', 'maria.gomez@email.com',    'pass123', 'Mar√≠a',    'G√≥mez',    '555-2345'),
+			('cliente', '11223344', 'luis.rodriguez@email.com', 'pass123', 'Luis',     'Rodr√≠guez','555-3456'),
+			('cliente', '22334455', 'ana.martinez@email.com',   'pass123', 'Ana',      'Mart√≠nez', '555-4567'),
+			('cliente', '33445566', 'carlos.sanchez@email.com', 'pass123', 'Carlos',   'S√°nchez',  '555-5678'),
+			('cliente', '44556677', 'elena.ferrer@email.com',   'pass123', 'Elena',    'Ferrer',   '555-6789'),
+			('cliente', '55667788', 'pedro.alvarez@email.com',  'pass123', 'Pedro',    '√Ålvarez',  '555-7890'),
+			('cliente', '66778899', 'sofia.lopez@email.com',    'pass123', 'Sof√≠a',    'L√≥pez',    '555-8901'),
+			('cliente', '77889900', 'jorge.garcia@email.com',   'pass123', 'Jorge',    'Garc√≠a',   '555-9012'),
+			('cliente', '88990011', 'lucia.morales@email.com',  'pass123', 'Luc√≠a',    'Morales',  '555-0123'),
+			('cliente', '99001122', 'daniel.perez@email.com',   'pass123', 'Daniel',   'P√©rez',    '555-1234'),
+			('cliente', '10011223', 'veronica.rojas@email.com', 'pass123', 'Ver√≥nica', 'Rojas',    '555-2345'),
+			('cliente', '11122334', 'martin.molina@email.com',  'pass123', 'Mart√≠n',   'Molina',   '555-3456'),
+			('cliente', '12233445', 'silvia.gonzalez@email.com','pass123', 'Silvia',   'Gonz√°lez', '555-4567'),
+			('cliente', '13344556', 'alfonso.torres@email.com', 'pass123', 'Alfonso',  'Torres',   '555-5678'),
+			('cliente', '14455667', 'raquel.diaz@email.com',    'pass123', 'Raquel',   'D√≠az',     '555-6789'),
+			('cliente', '15566778', 'ricardo.castro@email.com', 'pass123', 'Ricardo',  'Castro',   '555-7890'),
+			('cliente', '16677889', 'marta.suarez@email.com',   'pass123', 'Marta',    'Su√°rez',   '555-8901'),
+			('cliente', '17788990', 'francisco.martinez@email.com','pass123','Francisco','Mart√≠nez','555-9012'),
+			('cliente', '18899001', 'patricia.lopez@email.com', 'pass123', 'Patricia', 'L√≥pez',    '555-0123');
 
 		--LIBROS
-		EXEC SP_InsertLibro @Titulo = 'Cien aÒos de soledad', @AnioPublicacion = 1967, @Autores = '1', @Categorias = '1,6';
+		EXEC SP_InsertLibro @Titulo = 'Cien a√±os de soledad', @AnioPublicacion = 1967, @Autores = '1', @Categorias = '1,6';
 		EXEC SP_InsertLibro @Titulo = '1984', @AnioPublicacion = 1949, @Autores = '3', @Categorias = '1,3,4';
 		EXEC SP_InsertLibro @Titulo = 'Orgullo y Prejuicio', @AnioPublicacion = 1813, @Autores = '6', @Categorias = '5,6';
 		EXEC SP_InsertLibro @Titulo = 'Harry Potter y la piedra filosofal', @AnioPublicacion = 1997, @Autores = '2', @Categorias = '7,8';
 		EXEC SP_InsertLibro @Titulo = 'Las aventuras de Tom Sawyer', @AnioPublicacion = 1876, @Autores = '8', @Categorias = '1,8';
-		EXEC SP_InsertLibro @Titulo = 'Alicia en el paÌs de las maravillas', @AnioPublicacion = 1865, @Autores = '9', @Categorias = '7,8';
-		EXEC SP_InsertLibro @Titulo = 'FundaciÛn', @AnioPublicacion = 1951, @Autores = '4', @Categorias = '3';
+		EXEC SP_InsertLibro @Titulo = 'Alicia en el pa√≠s de las maravillas', @AnioPublicacion = 1865, @Autores = '9', @Categorias = '7,8';
+		EXEC SP_InsertLibro @Titulo = 'Fundaci√≥n', @AnioPublicacion = 1951, @Autores = '4', @Categorias = '3';
 		EXEC SP_InsertLibro @Titulo = 'Kafka en la orilla', @AnioPublicacion = 2002, @Autores = '7', @Categorias = '1,7';
 
 		--EJEMPLARES
@@ -354,28 +394,28 @@ BEGIN TRY
 			(1, 'Disponible', 'Leve desgaste en portada'),    -- IDEjemplar = 2
 			(2, 'Prestado', NULL),                            -- IDEjemplar = 3
 			(2, 'Disponible', NULL),                          -- IDEjemplar = 4
-			(3, 'Prestado', 'Manchas en las primeras p·ginas'),-- IDEjemplar = 5
+			(3, 'Prestado', 'Manchas en las primeras p√°ginas'),-- IDEjemplar = 5
 			(4, 'Disponible', NULL),                          -- IDEjemplar = 6
 			(4, 'Prestado', NULL),                            -- IDEjemplar = 7
 			(4, 'Disponible', NULL),                          -- IDEjemplar = 8
 			(5, 'Disponible', NULL),                          -- IDEjemplar = 9
 			(6, 'Disponible', NULL),                          -- IDEjemplar = 10
 			(7, 'Disponible', NULL),                          -- IDEjemplar = 11
-			(7, 'Disponible', 'EdiciÛn especial'),            -- IDEjemplar = 12
-			(8, 'Prestado', NULL);                          -- IDEjemplar = 13
+			(7, 'Disponible', 'Edici√≥n especial'),            -- IDEjemplar = 12
+			(8, 'Prestado', NULL);							  -- IDEjemplar = 13
 
 		--PRESTAMOS
-		INSERT INTO Prestamos (IDUsuario, IDEjemplar, FechaPrestamo, FechaDevolucion, Devuelto)
+		INSERT INTO Prestamos (IDCliente, IDAdmin, IDEjemplar, FechaPrestamo, FechaDevolucion, Devuelto)
 		VALUES 
-			(1, 1, '2025-06-01', '2025-06-15', 0),
-			(2, 2, '2025-06-02', '2025-06-16', 1),
-			(2, 13, '2025-06-19', '2025-07-03', 0),
-			(3, 3, '2025-06-05', '2025-06-19', 0),
-			(4, 4, '2025-06-06', '2025-06-20', 1),
-			(5, 5, '2025-06-07', '2025-06-21', 0),
-			(6, 6, '2025-06-08', '2025-06-22', 1),
-			(7, 7, '2025-06-09', '2025-06-23', 0),
-			(8, 8, '2025-06-10', '2025-06-24', 1);
+			(3, 1,  1, '2025-06-01', '2025-06-15', 0),
+			(4, 1,  2, '2025-06-02', '2025-06-16', 1),
+			(4, 2, 13, '2025-06-19', '2025-07-03', 0),
+			(5, 1,  3, '2025-06-05', '2025-06-19', 0),
+			(6, 2,  4, '2025-06-06', '2025-06-20', 1),
+			(7, 1,  5, '2025-06-07', '2025-06-21', 0),
+			(8, 2,  6, '2025-06-08', '2025-06-22', 1),
+			(9, 1,  7, '2025-06-09', '2025-06-23', 0),
+			(10, 2, 8, '2025-06-10', '2025-06-24', 1);
 
 		UPDATE Ejemplares SET Estado = 'Disponible' WHERE IDEjemplar IN (SELECT IDEjemplar FROM Prestamos WHERE Devuelto = 1);
 	COMMIT TRANSACTION
