@@ -268,6 +268,12 @@ CREATE PROCEDURE SP_LibrosConMasPrestamosPorRangoFechas
 	@Hasta DATE
 AS
 BEGIN
+	IF @Hasta < @Desde
+	BEGIN
+		RAISERROR('LA FECHA FINAL NO PUEDE SER ANTERIOR A LA FECHA INICIAL', 16, 1)
+		RETURN
+	END
+
 	SELECT
 		L.IDLibro,
 		L.Titulo,
