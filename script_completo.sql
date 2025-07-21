@@ -245,6 +245,23 @@ BEGIN
 END
 GO
 
+CREATE PROCEDURE SP_CategoriaConMasPrestamosPorAnio
+    @Anio INT
+AS
+BEGIN
+    SELECT TOP 1
+        C.Descripcion AS Categoria,
+        COUNT(*) AS CantidadPrestamos
+    FROM Prestamos P
+    JOIN Ejemplares E ON P.IDEjemplar = E.IDEjemplar
+    JOIN Libros L ON E.IDLibro = L.IDLibro
+    JOIN LibroCategoria LC ON L.IDLibro = LC.IDLibro
+    JOIN Categorias C ON LC.IDCategoria = C.IDCategoria
+    WHERE YEAR(P.FechaPrestamo) = @Anio
+    GROUP BY C.Descripcion
+    ORDER BY COUNT(*) DESC
+END
+GO
 
 -- ========================================
 -- 4. CREACIÓN DE TRIGGERS
