@@ -81,3 +81,20 @@ BEGIN
     GROUP BY C.Descripcion
     ORDER BY COUNT(*) DESC
 END
+
+CREATE PROCEDURE SP_LibrosConMasPrestamosPorRangoFechas
+	@Desde DATE,
+	@Hasta DATE
+AS
+BEGIN
+	SELECT
+		L.IDLibro,
+		L.Titulo,
+		COUNT(*) AS CantidadPrestamos
+	FROM Prestamos P
+	INNER JOIN Ejemplares E ON P.IDEjemplar = E.IDEjemplar
+	INNER JOIN Libros L ON E.IDLibro = L.IDLibro
+	WHERE P.FechaPrestamo BETWEEN @Desde AND @Hasta
+	GROUP BY L.IDLibro, L.Titulo
+	ORDER BY CantidadPrestamos DESC
+END
